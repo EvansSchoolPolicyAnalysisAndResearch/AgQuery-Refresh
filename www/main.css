@@ -1,0 +1,328 @@
+html,body {
+	font-family:		'Open Sans', sans-serif;
+	font-size:			12pt;
+	line-height:		1.722222;
+	font-weight:		normal;
+	color:				#555;
+	background-color: 	#fff;
+	height: 			100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family:	'Encode Sans', sans-serif;
+	font-weight: 	900;
+}
+
+
+  /****************************************************************************/
+ /*                                  HEADER                                  */
+/****************************************************************************/
+header {
+	color:			#000;
+	margin: 		0 auto 0;
+	padding: 		0;
+	width: 			1024px;
+}
+
+  /************/
+ /*    H1    */
+/************/
+header h1 {
+	display: 		inline-block;
+	padding:		0;
+	color: 			rgba(0, 0, 0, 0);
+	background: 	#fff url('banner720.png') center center no-repeat;
+	margin: 		0 0 0 30px;
+	width:			720px;
+	height:			256px;
+}
+
+  /************/
+ /*    NAV   */
+/************/
+header nav{
+	display:		inline-block;
+	margin: 		30px 0 0;
+	float:			right;
+}
+
+/* Nav Link List */
+header nav ul{
+	margin:			5px auto 5px;
+	padding:		0;
+	display:		inline-block;
+}
+header nav li {
+	list-style:		none;
+	font-size:		24px;
+	margin: 		0 auto 5px;
+	border:			3px solid #555;
+}
+header nav a {
+	color: 			#fff;
+	display:		inline-block;
+	height: 		36px;
+	padding:		10px 10px 10px 48px;
+	width:			180px;
+	border:			3px solid #fff;
+	
+}
+header nav a:link{
+	text-decoration: none;
+}
+
+header nav a:hover {
+	text-decoration: underline;
+	color: #555;
+}
+
+/* Link Images */
+.about {
+	background:		#4c2d82 url('../about32r.png') left center no-repeat;
+	margin: 		0;
+}
+.about:hover {
+	background:		#fff url('../about32ir.png') left center no-repeat;
+}
+.home {
+	background:		#4c2d82 url('../home32r.png') left center no-repeat;
+}
+.home:hover {
+	background:		#fff url('../home32ir.png') left center no-repeat;
+}
+.dl {
+	background:		#4c2d82 url('../dl32r.png') left center no-repeat;
+}
+.dl:hover {
+	background:		#fff url('../dl32ir.png') left center no-repeat;
+}
+  /****************************************************************************/
+ /*                                  CONTENT                                 */
+/****************************************************************************/
+.contenthole {
+	margin:			0 auto 0;
+	width:			1024px;
+	padding-bottom:	600px;
+}
+
+/* Most content CSS is in page specific files */
+
+  /****************************************************************************/
+ /*                                  FOOTER                                  */
+/****************************************************************************/
+footer {	
+	position: 		relative;
+	/* negative value of footer height */
+	margin:			-500px auto 0;
+  	height: 		500px;
+  	width: 			1024px;
+  	padding:		0 0 0;
+  	border-top:		5px solid #555 ;
+  	clear: 			both;
+}
+#credits{
+	float: 			left;
+	width: 			480px;
+	margin: 		0 0 0;
+	padding: 		0 0 0;
+}
+#about {
+	margin:			0 0 0;
+	padding: 		0 0 0;
+	width: 			480px;
+	float:			right;
+}
+#footimg {
+	background: #fff url('../vfooter360.png') center top no-repeat;
+	height:			400px;
+	width:			480px;
+	color:			rgba(256, 256, 256, 0);
+}
+
+#citediv {
+	clear:			both;
+}
+
+#toggle {
+    display: none;
+}
+
+.citation {
+	border-top:		1px dotted #555;
+	margin-top:		0;
+	padding-left: 	2em;
+	text-indent:	-2em;
+	height:			0;
+ 	overflow: 		hidden;
+ 	transition: 	height 400ms linear;
+ }
+#citediv p {
+	margin-bottom:	0;
+}
+
+label .arrow-dn { 
+	display: 		inline-block; 
+	transition:		transform 400ms linear;
+}
+
+#toggle:checked ~ .citation { 
+    height: 		115px;
+    border-top:		none;
+}
+
+#toggle:checked ~ p label .arrow-dn { 
+	transform: 		rotate(-180deg);
+}
+
+
+  /****************************************************************************/
+ /*                               TABLET  MODE                               */
+/****************************************************************************/
+@media (min-width: 768px) and (max-width: 1023px){
+	.container {
+		width: 768px;
+	}
+	header {
+		margin:			5px auto 5px;
+		width: 			768px;
+		display:		block;
+	}
+
+	header h1 {
+		margin:			0;
+		padding:		0;
+		width:			768px;
+	}
+
+	header nav {
+		margin: 		0 auto 0px;
+		padding: 		0 0 0 0;
+		width:			768px;
+		float:			none;
+	}
+
+	header nav ul {
+		display: 		inline-block;
+		margin: 		5px auto 5px ;
+		padding:		0;
+	}
+
+	header nav li {
+		margin:			0 5px 0 0;
+		display:		inline-block;
+		font-size:		22px;
+	}
+
+	header nav a {
+		width: 			170px;
+	}
+
+	footer {	
+	  	width: 			720px;
+	  	padding:		0 0 0;
+	  	clear: 			both;
+	}
+
+	#credits{
+		width: 			360px;
+	}
+
+	#about {
+		width: 			360px;
+		float:			right;
+	}
+
+	#footimg {
+		height:			400px;
+		width:			360px;
+	}
+	
+	#toggle:checked ~ .citation { 
+    	height: 		140px;
+   		border-top:		none;
+	}
+}
+  /****************************************************************************/
+ /*                                PHONE MODE                                */
+/****************************************************************************/
+@media(max-width: 767px)
+{	
+	.container {
+		width: 			360px;
+	}
+	header {
+		width: 			345px;
+		padding-top:	10px;
+		margin: 		0 auto 0;
+		overflow:		hidden;
+	}
+
+	header h1 {
+		background: #fff url('../banner360.png') left center no-repeat;
+		width: 			345px;
+		height: 		128px;
+		display: 		block;
+		overflow:		hidden;
+		padding: 		0;
+		margin: 		0;
+	}
+
+	header nav {
+		margin:			0 auto 0;
+		width:			345px;
+		float: 			none;
+	}
+
+	header nav ul {
+		margin: 		5px auto 5px;
+		width: 			345px;
+		display: 		block;
+	}
+
+	header nav li{
+		padding:		0;
+		display: 		block;
+		margin: 		0 0 5px;
+	}
+
+	header nav li a {
+		margin: 		0;
+		padding: 		10px;
+		width:			313px;
+		text-align: 	center;
+	}
+
+	.contenthole {
+		padding-bottom:	1100px;
+	}
+
+	footer {	
+		position: 		relative;
+		/* negative value of footer height */
+		margin:			-1100px auto 0;
+	  	height: 		1100px;
+	  	width: 			345px;
+	  	padding:		0 0 0;
+	  	clear: 			both;
+	}
+
+	#credits{
+		width: 			345px;
+		float:			none;
+	}
+
+	#about {
+		width: 			345px;
+		float:			none;
+	}
+
+	#footimg {
+		height:			400px;
+		width:			360px;
+	}
+
+	#citediv {
+		width:	3		45px;
+	}
+}
+
