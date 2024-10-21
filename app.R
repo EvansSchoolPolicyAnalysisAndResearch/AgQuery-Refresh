@@ -101,6 +101,7 @@ ui <- page_fillable(
     card(card_header(HTML("Select Farm Size Disaggregation <i>(Optional)</i>")),
          checkboxGroupInput("farmsizes",label="", choices=farm_sizes))
     ),
+  
   dataTableOutput("dataTab")
 )
 
@@ -110,7 +111,7 @@ server <- function(input, output) {
     output$countree <- renderTree(dfToTree(countree, c("Geography","Year")))
     output$indics <- renderTree(dfToTree(indiclist, c("indicatorcategory", "indicatorname")))
     outtable <- reactive({filterTable(indicators, get_selected(input$countree, format="slices"), get_selected(input$indics, format="slices"), input$genders, input$farmsizes)})
-    output$dataTab <- renderDataTable(req(outtable()))
+    output$dataTab <- renderDataTable(datatable(req(outtable()), extensions='Buttons', options=list(dom='Bfrtip', buttons=list(list(extend='colvis', text='Show/Hide Columns', columns=(1:26))))))
 }
 
 
