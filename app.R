@@ -13,10 +13,13 @@ library(DT)
 library(readxl)
 library(bslib)
 library(dplyr)
+library(duckdb)
+library(duckplyr)
 
-
-indicators <- read_excel("Data/EPAR_UW_335_AgDev_Indicator_Estimates.xlsx", 
-                         sheet = "Estimates by Instrument")
+#indicators <- read_excel("Data/EPAR_UW_335_AgDev_Indicator_Estimates.xlsx", 
+#                         sheet = "Estimates by Instrument")
+con <- dbConnect(duckdb(), dbdir="Data/database.duckdb", read_only=T)
+duckdb_register(con, "indicators", indicators)
 countree <- indicators %>% select(Geography, Year) %>% distinct()
 indiclist <- indicators %>% select(indicatorcategory, indicatorname) %>% distinct()
 genders <- indicators %>% select(genderdisaggregation) %>% distinct() %>% unlist(use.names=F)
@@ -82,16 +85,33 @@ filterTable <- function(tab, countries, indics, gender, farmsize){
 }
 
 # Define UI for application that draws a histogram
-ui <- page_fillable(
+ui <- page_fixed(
+  includeCSS("www/main.css"),
   tags$head(
     tags$style("@import url('https://fonts.googleapis.com/css?family=Encode+Sans:900|Open+Sans');"),
-    tags$link(rel = "stylesheet", type = "text/css", href = "main.css")
+    #tags$link(rel = "stylesheet", type = "text/css", href = "main.css")#,
+    #tags$h1(id='banner')
   ),
     # Application title
-    titlePanel(HTML("<h1 id='banner'>AgQuery from EPAR</h1>")),
-
+    #headerPanel(HTML("<h1 id='banner'>AgQuery from EPAR</h1>"), windowTitle="AgQuery"),
+    tags$header(
+      tags$h1(
+      id='banner', 'AgQuery from EPAR'
+    ),
+      tags$nav(
+        tags$ul(
+          tags$li(
+            tags$a(class='home', href="/", width='180px', 'AgQuery Home')
+          ),
+          tags$li(
+            tags$a(class='dl', href='https://github.com/EvansSchoolPolicyAnalysisAndResearch/LSMS-Data-Dissemination/raw/main/EPAR_UW_335_AgDev_Indicator_Estimates.xlsx', 'Get Estimates')
+          ),
+          tags$li(
+            tags$a(class='about', href='https://evans.uw.edu/policy-impact/epar/agricultural-development-data-curation', 'About the Data')
+          )
+      ))),
     # Sidebar with a slider input for number of bins 
-  layout_column_wrap(width=1/2, 
+  layout_columns( 
     card(card_header("Select Country and Survey Year(s)"),
          shinyTree("countree", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton')),
     card(card_header("Select Indicator(s)"),
@@ -99,10 +119,24 @@ ui <- page_fillable(
     card(card_header(HTML("Select Gender Disaggregation <i>(Optional)</i>")),
          checkboxGroupInput("genders",label="", choices=genders)),
     card(card_header(HTML("Select Farm Size Disaggregation <i>(Optional)</i>")),
-         checkboxGroupInput("farmsizes",label="", choices=farm_sizes))
+         checkboxGroupInput("farmsizes",label="", choices=farm_sizes)),
+    col_widths=c(-1, 5, 5, -1, -1, 5, 5, -1)
     ),
-  
-  dataTableOutput("dataTab")
+  HTML("<br><hr><h3>Results</h3>"),
+  tags$div(DTOutput("dataTab"), style="font-size:80%", margin='0 0 0 -20px'),
+  tags$footer(
+    tags$div(id='citediv',
+      tags$p(class='citation', 'University of Washington, Evans Policy Analysis and Research Group (EPAR) (2024) Living Standards Measurement Study - Integrated Surveys on Agriculture: Processed Datasets for Ethiopia ESS, Malawi IHS, Nigeria GHS, Tanzania NPS, and Uganda NPS from 2009-2022.'
+             ),
+      tags$p(class='citation', 'This content was originally published in 2019 and last updated on October 24th, 2024')),
+    tags$div(id='credits',
+             tags$p(id='footimg', 'EPAR @ University of Washington')),
+    tags$div(id='about',
+             tags$p(HTML("&copy; Copyright 2019-2024 Evans Policy Analysis and Research Group")),
+             tags$p('Established in 2008, the Evans School Policy Analysis and Research Group (EPAR) uses an innovative student-faculty team model to provide rigorous, applied research and analysis to international development stakeholders. Our research focuses on agriculture, development policy, financial services, poverty reduction, gender, and measurement and evaluation.'),
+             tags$p('To learn more about EPAR, please visit our ', tags$a(href='https://epar.evans.uw.edu', 'homepage'), ".")
+             )
+    )
 )
 
 # Define server logic required to draw a histogram
@@ -111,8 +145,9 @@ server <- function(input, output) {
     output$countree <- renderTree(dfToTree(countree, c("Geography","Year")))
     output$indics <- renderTree(dfToTree(indiclist, c("indicatorcategory", "indicatorname")))
     outtable <- reactive({filterTable(indicators, get_selected(input$countree, format="slices"), get_selected(input$indics, format="slices"), input$genders, input$farmsizes)})
-    output$dataTab <- renderDataTable(datatable(req(outtable()), extensions='Buttons', options=list(dom='Bfrtip', buttons=list(list(extend='colvis', text='Show/Hide Columns', columns=(1:26))))))
-}
+    output$dataTab <- renderDT(datatable(req(outtable()), extensions='Buttons', options=list(dom='Bfrtip', scrollX=T, buttons=list(list(extend='colvis', text='Show/Hide Columns', columns=(1:26))))))
+onStop(function() dbDisconnect(con))
+    }
 
 
 # Run the application 

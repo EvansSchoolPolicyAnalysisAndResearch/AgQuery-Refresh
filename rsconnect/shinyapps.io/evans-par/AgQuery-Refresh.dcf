@@ -1,11 +1,11 @@
 name: AgQuery-Refresh
-title: AgQuery-Refresh
+title: AgQuery
 username: evans-par
 account: evans-par
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13062472
-bundleId: 9241462
+bundleId: 9265920
 url: https://evans-par.shinyapps.io/AgQuery-Refresh/
 version: 1
 asMultiple: FALSE

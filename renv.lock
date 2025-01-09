@@ -9,6 +9,17 @@
     ]
   },
   "Packages": {
+    "DBI": {
+      "Package": "DBI",
+      "Version": "1.2.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "methods"
+      ],
+      "Hash": "065ae649b05f1ff66bb0c793107508f5"
+    },
     "DT": {
       "Package": "DT",
       "Version": "0.33",
@@ -134,6 +145,13 @@
       ],
       "Hash": "b21916dd77a27642b447374a5d30ecf3"
     },
+    "collections": {
+      "Package": "collections",
+      "Version": "0.3.7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "90a0eda114ab0bef170ddbf5ef0cd93f"
+    },
     "commonmark": {
       "Package": "commonmark",
       "Version": "1.9.1",
@@ -219,6 +237,42 @@
         "vctrs"
       ],
       "Hash": "fedd9d00c2944ff00a0e2696ccf048ec"
+    },
+    "duckdb": {
+      "Package": "duckdb",
+      "Version": "1.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "DBI",
+        "R",
+        "methods",
+        "utils"
+      ],
+      "Hash": "07b14294bf881ad9f1066f2078274a04"
+    },
+    "duckplyr": {
+      "Package": "duckplyr",
+      "Version": "0.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "DBI",
+        "R",
+        "cli",
+        "collections",
+        "dplyr",
+        "duckdb",
+        "glue",
+        "jsonlite",
+        "lifecycle",
+        "rlang",
+        "tibble",
+        "tidyselect",
+        "utils",
+        "vctrs"
+      ],
+      "Hash": "8de3d932a099f4c19907b4e459d854eb"
     },
     "evaluate": {
       "Package": "evaluate",
