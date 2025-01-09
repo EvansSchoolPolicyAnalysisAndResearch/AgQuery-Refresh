@@ -19,7 +19,7 @@ h1, h2, h3, h4, h5, h6 {
 /****************************************************************************/
 header {
 	color:			#000;
-	margin: 		0 auto 0;
+	margin: 		0 auto 30px;
 	padding: 		0;
 	width: 			1024px;
 }
@@ -44,6 +44,7 @@ header nav{
 	display:		inline-block;
 	margin: 		30px 0 0;
 	float:			right;
+	min-width: 		250px
 }
 
 /* Nav Link List */
@@ -61,9 +62,9 @@ header nav li {
 header nav a {
 	color: 			#fff;
 	display:		inline-block;
-	height: 		36px;
+	height: 		fit-content;
 	padding:		10px 10px 10px 48px;
-	width:			180px;
+	width:			250px;
 	border:			3px solid #fff;
 	
 }
@@ -105,17 +106,23 @@ header nav a:hover {
 	padding-bottom:	600px;
 }
 
+.bslib-card {
+	border-width: medium;
+	border-color: #4c2d82;
+}
+
 /* Most content CSS is in page specific files */
 
   /****************************************************************************/
  /*                                  FOOTER                                  */
 /****************************************************************************/
 footer {	
-	position: 		relative;
+	position: 		static;
 	/* negative value of footer height */
-	margin:			-500px auto 0;
+	/*margin:			-500px auto 0; */
+	margin:			30px auto 0;
   	height: 		500px;
-  	width: 			1024px;
+  	width: 			100%;
   	padding:		0 0 0;
   	border-top:		5px solid #555 ;
   	clear: 			both;
