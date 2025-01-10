@@ -13,17 +13,25 @@ library(DT)
 library(readxl)
 library(bslib)
 library(dplyr)
-library(duckdb)
-library(duckplyr)
+library(stringr)
+library(shinyjs)
+#library(shinyWidgets)
+#library(duckdb)
+#library(duckplyr)
 
 #indicators <- read_excel("Data/EPAR_UW_335_AgDev_Indicator_Estimates.xlsx", 
 #                         sheet = "Estimates by Instrument")
-con <- dbConnect(duckdb(), dbdir="Data/database.duckdb", read_only=T)
-duckdb_register(con, "indicators", indicators)
+#DuckDB will make this faster but is currently experiencing compilation issues on shinyapps.io
+#con <- dbConnect(duckdb(), dbdir="Data/database.duckdb", read_only=T)
+#duckdb_register(con, "indicators", indicators)
+indicators <- read.csv("Data/AgDev_Indicator_Estimates.csv")
+row.names(indicators) <- NULL
+
 countree <- indicators %>% select(Geography, Year) %>% distinct()
 indiclist <- indicators %>% select(indicatorcategory, indicatorname) %>% distinct()
-genders <- indicators %>% select(genderdisaggregation) %>% distinct() %>% unlist(use.names=F)
-genders <- genders[order(genders)]
+genders <- indicators %>% select(genderdisaggregation) %>% distinct()
+genders$level <- str_extract(genders$genderdisaggregation, "(households)|(livestock managers)|(plot managers)|(laborers)") %>% str_to_title
+genders <- genders[order(genders$level),]
 farm_sizes <- indicators %>% select(hhfarmsizedisaggregation) %>% distinct() %>% unlist(use.names=F)
 farm_sizes <- farm_sizes[order(farm_sizes)]
 table_nicenames <- c("Geography", 
@@ -66,7 +74,8 @@ filterTable <- function(tab, countries, indics, gender, farmsize){
     tab <- inner_join(tab, indicsout, by=c("indicatorcategory","indicatorname"))
   }
   if(length(gender > 0)){
-    tab <- tab %>% filter(genderdisaggregation %in% gender)
+    gendout <- treeToDf(gender)[,2]
+    tab <- tab %>% filter(genderdisaggregation %in% gendout)
   }
   if(length(farmsize > 0)){
     tab <- tab %>% filter(hhfarmsizedisaggregation %in% farmsize)
@@ -77,7 +86,8 @@ filterTable <- function(tab, countries, indics, gender, farmsize){
                         p25 = signif(p25, 4),
                         p50 = signif(p50, 4),
                         p75 = signif(p75, 4),
-                        min = signif(min, 4))
+                        min = signif(min, 4),
+                        max = signif(max, 4))
   
   names(tab) <- table_nicenames
     
@@ -87,39 +97,55 @@ filterTable <- function(tab, countries, indics, gender, farmsize){
 # Define UI for application that draws a histogram
 ui <- page_fixed(
   includeCSS("www/main.css"),
-  tags$head(
-    tags$style("@import url('https://fonts.googleapis.com/css?family=Encode+Sans:900|Open+Sans');"),
+    tags$head(
+      tags$style("@import url('https://fonts.googleapis.com/css?family=Encode+Sans:900|Open+Sans');
+                 .btn.btn-default.action-button {--bs-btn-line-height: 0.9; font-size:0.7em};"),
     #tags$link(rel = "stylesheet", type = "text/css", href = "main.css")#,
     #tags$h1(id='banner')
   ),
     # Application title
     #headerPanel(HTML("<h1 id='banner'>AgQuery from EPAR</h1>"), windowTitle="AgQuery"),
-    tags$header(
-      tags$h1(
+
+      tags$header(
+        tags$h1(
       id='banner', 'AgQuery from EPAR'
     ),
       tags$nav(
         tags$ul(
           tags$li(
-            tags$a(class='home', href="/", width='180px', 'AgQuery Home')
+            a(class='dl', href='https://github.com/EvansSchoolPolicyAnalysisAndResearch/LSMS-Data-Dissemination/raw/main/EPAR_UW_335_AgDev_Indicator_Estimates.xlsx', 'Get Estimates')
           ),
           tags$li(
-            tags$a(class='dl', href='https://github.com/EvansSchoolPolicyAnalysisAndResearch/LSMS-Data-Dissemination/raw/main/EPAR_UW_335_AgDev_Indicator_Estimates.xlsx', 'Get Estimates')
-          ),
-          tags$li(
-            tags$a(class='about', href='https://evans.uw.edu/policy-impact/epar/agricultural-development-data-curation', 'About the Data')
+            a(class='about', href='https://evans.uw.edu/policy-impact/epar/agricultural-development-data-curation', 'About the Data')
           )
       ))),
-    # Sidebar with a slider input for number of bins 
+  useShinyjs(),
+
   layout_columns( 
     card(card_header("Select Country and Survey Year(s)"),
-         shinyTree("countree", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton')),
+         shinyTree("countree", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton'),
+         fluidRow(column(4, actionButton("selectCtry", "Select All")),
+         column(4, actionButton("deselectCtry", "Clear Filter")))
+         #treeInput("countree", "", choices=create_tree(countree, levels=c("Geography","Year")), closeDepth=0)
+         ),
     card(card_header("Select Indicator(s)"),
-         shinyTree("indics", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton')),
+         shinyTree("indics", checkbox=T, search=T, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton'),
+         fluidRow(column(4, actionButton("selectIndics", "Select All")),
+         column(4, actionButton("deselectIndics", "Clear Filter")))
+         #treeInput("indics", "", choices=create_tree(indiclist, levels=c("indicatorcategory", "indicatorname")),closeDepth=0)
+         ),
     card(card_header(HTML("Select Gender Disaggregation <i>(Optional)</i>")),
-         checkboxGroupInput("genders",label="", choices=genders)),
+         shinyTree("genders", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton'),
+         fluidRow(column(4, actionButton("selectGender", "Select All")),
+         column(4, actionButton("deselectGender", "Clear Filter")))
+         ),
     card(card_header(HTML("Select Farm Size Disaggregation <i>(Optional)</i>")),
-         checkboxGroupInput("farmsizes",label="", choices=farm_sizes)),
+         #checkboxGroupInput("farmsizes",label="", choices=farm_sizes),
+         shinyTree("farmsizes", checkbox=T, multiple=T, themeDots = F, whole_node=T, themeIcons=F, theme='proton'),
+         fluidRow(column(4, actionButton("selectFarmsize", "Select All")),
+         column(4, actionButton("deselectFarmsize", "Clear Filter")))
+         ),
+    
     col_widths=c(-1, 5, 5, -1, -1, 5, 5, -1)
     ),
   HTML("<br><hr><h3>Results</h3>"),
@@ -140,14 +166,41 @@ ui <- page_fixed(
 )
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
 
     output$countree <- renderTree(dfToTree(countree, c("Geography","Year")))
     output$indics <- renderTree(dfToTree(indiclist, c("indicatorcategory", "indicatorname")))
-    outtable <- reactive({filterTable(indicators, get_selected(input$countree, format="slices"), get_selected(input$indics, format="slices"), input$genders, input$farmsizes)})
-    output$dataTab <- renderDT(datatable(req(outtable()), extensions='Buttons', options=list(dom='Bfrtip', scrollX=T, buttons=list(list(extend='colvis', text='Show/Hide Columns', columns=(1:26))))))
-onStop(function() dbDisconnect(con))
-    }
+    output$genders <- renderTree(dfToTree(genders, c("level", "genderdisaggregation")))
+    #farm_sizes <- as.data.frame(farm_sizes)
+    #names(farm_sizes) <- "farmsize"
+    #output$farmsizes <- renderTree(dfToTree(farm_sizes, "farmsize"))
+    #farm_list <- vector(mode="character", length(farm_sizes))
+    #names(farm_list) <- farm_sizes
+    output$farmsizes <- renderTree(dfToTree(as.data.frame(farm_sizes)))
+    
+    observeEvent(input$selectCtry, {runjs(HTML('$("#countree").jstree("select_all");'))})
+    observeEvent(input$selectIndics, {runjs(HTML('$("#indics").jstree("select_all");'))})
+    observeEvent(input$selectGender, {runjs(HTML('$("#genders").jstree("select_all");'))})
+    observeEvent(input$deselectCtry, {runjs(HTML('$("#countree").jstree("deselect_all");'))})
+    observeEvent(input$deselectIndics, {runjs(HTML('$("#indics").jstree("deselect_all");'))})
+    observeEvent(input$deselectGender, {runjs(HTML('$("#genders").jstree("deselect_all");'))})
+    #observeEvent(input$selectFarm, {runjs(HTML('$("#farmsizes").jstree("select_all");'))})
+    observeEvent(input$deselectFarm, {updateSelectInput("farmsizes", selected=character(0))})
+    observeEvent(input$selectFar, {updateSelectInput("farmsizes", selected=farm_sizes)})
+    
+    outtable <- reactive({filterTable(indicators, get_selected(input$countree, format="slices"), get_selected(input$indics, format="slices"), get_selected(input$genders, format="slices"), input$farmsizes)})
+    output$dataTab <- renderDT({datatable(req(outtable()), extensions='Buttons', 
+              options=list(autoWidth=T, 
+                           columnDefs=list(list(width='150px', targets=6)),
+                           dom='Bfrtip', 
+                           scrollX=T,
+                           buttons=list(list(extend='colvis', text='Show/Hide Columns', columns=(1:26)), "csv", "excel")))
+      })
+    
+                               
+#onStop(function() dbDisconnect(con))
+
+  }
 
 
 # Run the application 
