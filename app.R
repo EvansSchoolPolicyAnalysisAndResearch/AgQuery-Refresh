@@ -20,15 +20,14 @@ library(shinyWidgets)
 #library(dbplyr)
 #library(duckplyr)
 
-#indicators <- read_excel("Data/EPAR_UW_335_AgDev_Indicator_Estimates.xlsx", 
-#                         sheet = "Estimates by Instrument")
+indicators <- read_excel("Data/AgDev_Indicator_Estimates.xlsx")
 #DuckDB will make this faster but is currently experiencing compilation issues on shinyapps.io
 #indicators <- data.frame()
 #con <- dbConnect(duckdb(), dbdir="Data/database.duckdb", read_only=T)
 #indicators <- tbl(con, "indicators")
 #duckdb_register(con, "indicators", indicators, overwrite=T)
-indicators <- read.csv("Data/AgDev_Indicator_Estimates.csv")
-row.names(indicators) <- NULL
+#indicators <- read.csv("Data/AgDev_Indicator_Estimates.csv")
+#row.names(indicators) <- NULL
 
 countree <- indicators %>% select(Geography, Year) %>% distinct()
 indiclist <- indicators %>% select(indicatorcategory, indicatorname) %>% distinct()
