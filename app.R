@@ -110,8 +110,10 @@ filterTable <- function(tab, countries, indics, gender, farmsize){
 ui <- page_fixed(
   includeCSS("www/main.css"),
     tags$head(
-      tags$style("@import url('https://fonts.googleapis.com/css?family=Encode+Sans:900|Open+Sans');
-                 .btn.btn-default.action-button {--bs-btn-line-height: 0.9; font-size:0.7em};"),
+      tags$style("
+      @import url('https://fonts.googleapis.com/css?family=Encode+Sans:900|Open+Sans');
+                 .btn.btn-default.action-button {--bs-btn-line-height: 0.9; font-size:0.7em};
+                 "),
     #tags$link(rel = "stylesheet", type = "text/css", href = "main.css")#,
     #tags$h1(id='banner')
   ),
@@ -136,25 +138,33 @@ ui <- page_fixed(
 accordion_panel("Show/Hide Filters",
   layout_columns( 
     card(card_header("Select Country and Survey Year(s)"),
-         shinyTree("countree", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton'),
+         card_body(tags$div(style=".bslib-gap-spacing {gap: 0px !important};",
+                            shinyTree("countree", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton')
+                            )),
          card_footer(fluidRow(column(12, align="center", actionButton("selectCtry", "Select All", width='25%'),
          actionButton("deselectCtry", "Clear Filter", width='25%'))))
          #treeInput("countree", "", choices=create_tree(countree, levels=c("Geography","Year")), closeDepth=0)
          ),
     card(card_header("Select Indicator(s)"),
-         shinyTree("indics", checkbox=T, search=T, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton'),
+         card_body(tags$div(style=".bslib-gap-spacing {gap: 0px !important};", p(style='font-size: 8px; margin-bottom: 0px;', "Search"),
+         shinyTree("indics", checkbox=T, search=T, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton')
+         )),
          card_footer(fluidRow(column(12, align="center", actionButton("selectIndics", "Select All", width='25%'),
            actionButton("deselectIndics", "Clear Filter"))))
          #treeInput("indics", "", choices=create_tree(indiclist, levels=c("indicatorcategory", "indicatorname")),closeDepth=0)
          ),
     card(card_header(HTML("Select Gender Disaggregation <i>(Optional)</i>")),
-         shinyTree("genders", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton'),
+         card_body(tags$div(style=".bslib-gap-spacing {gap: 0px !important};",
+                            shinyTree("genders", checkbox=T, search=F, multiple=T, themeDots=F, whole_node=T, themeIcons=F, theme='proton')
+                            )),
          card_footer(fluidRow(column(12, align="center", actionButton("selectGender", "Select All", width='25%'),
          actionButton("deselectGender", "Clear Filter", width='25%'))))
          ),
     card(card_header(HTML("Select Farm Size Disaggregation <i>(Optional)</i>")),
          #checkboxGroupInput("farmsizes",label="", choices=farm_sizes),
-         shinyTree("farmsizes", checkbox=T, multiple=T, themeDots = F, whole_node=T, themeIcons=F, theme='proton'),
+         card_body(tags$div(style=".bslib-gap-spacing {gap: 0px !important};",
+                            shinyTree("farmsizes", checkbox=T, multiple=T, themeDots = F, whole_node=T, themeIcons=F, theme='proton')
+                            )),
          card_footer(fluidRow(column(12, align="center", actionButton("selectFarmsize", "Select All", width='25%'),
                  actionButton("deselectFarmsize", "Clear Filter", width='25%'))))
          ),
@@ -162,7 +172,9 @@ accordion_panel("Show/Hide Filters",
     col_widths=c(-1, 5, 5, -1, -1, 5, 5, -1)
     ))),
   HTML("<br><hr><h3>Results</h3>"),
-  tags$div(DTOutput("dataTab"), style="font-size:80%", margin='0 0 0 -20px'),
+  downloadButton("dataDL", "Download Data"), HTML("<br>&nbsp;"),
+  tags$div(
+           DTOutput("dataTab"), style="font-size:80%", margin='0 0 0 -20px'),
   tags$footer(
     tags$div(id='citediv',
       tags$p(class='citation', 'University of Washington, Evans Policy Analysis and Research Group (EPAR) (2024) Living Standards Measurement Study - Integrated Surveys on Agriculture: Processed Datasets for Ethiopia ESS, Malawi IHS, Nigeria GHS, Tanzania NPS, and Uganda NPS from 2009-2022.'
@@ -203,12 +215,18 @@ server <- function(input, output, session) {
     outtable <- reactive({filterTable(indicators, get_selected(input$countree, format="slices"), get_selected(input$indics, format="slices"), get_selected(input$genders, format="slices"), get_selected(input$farmsizes, format="slices"))})
     output$dataTab <- renderDT({datatable(req(outtable()), extensions='Buttons', 
               options=list(autoWidth=T, 
-                           columnDefs=list(list(width='150px', targets=6)),
-                           dom='Bfrtip', 
+                           columnDefs=list(list(width='150px', targets=6), list(visible=F, targets=0)),
+                           dom='Blfrtip', 
                            scrollX=T,
-                           buttons=list(list(extend='colvis', text='Show/Hide Columns', columns=(1:26)), "csv", "excel")))
+                           buttons=list(list(extend='colvis', text='Show/Hide Columns', columns=(1:26)))))
       })
-    
+  output$dataDL <- downloadHandler(filename="agquery_export.csv",
+    content=function(file){
+      rows=input$dataTab_rows_all
+      cols=lapply(2:length(input$dataTab_state$columns), FUN=function(x){if(input$dataTab_state$columns[[x]]$visible==T) return(x-1)}) |> unlist()
+      write.csv(outtable()[rows,cols, drop=F], file, row.names = F)
+    }
+  )
                                
 #onStop(function() dbDisconnect(con))
 
