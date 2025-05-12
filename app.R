@@ -91,6 +91,12 @@ filterTable <- function(tab, countries, indics, gender, farmsize){
     farmout <- inner_join(farmout, farm_sizes, by="farm_size_html") |> select(-farm_size_html)
     tab <- inner_join(tab, farmout, by=join_by(hhfarmsizedisaggregation == farm_size_raw))
   }
+  for(var in c("mean", "semean_strata", "sd","p25","p50","p75","min","max")){
+    if(is.character(tab[[var]])){
+    tab[[var]] <- ifelse(tab[[var]]=="NA", NA, tab[[var]])
+    tab[[var]] <- as.numeric(tab[[var]])
+    }
+  }
   tab <- tab %>% mutate(mean=signif(mean, 4), 
                         semean_strata = signif(semean_strata, 4),
                         sd = signif(sd, 4),
