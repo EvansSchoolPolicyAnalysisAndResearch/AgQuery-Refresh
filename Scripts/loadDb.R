@@ -2,9 +2,14 @@ library(duckdb)
 library(duckplyr)
 library(readxl)
 
-con <- dbConnect(duckdb(), dbdir="Data/database.duckdb", read_only=F)
-indicators <- read_excel("Data/EPAR_UW_335_AgDev_Indicator_Estimates.xlsx", 
-                                          sheet = "Estimates by Instrument")
+if(file.exists("Data/database.duckdb")){
+  file.remove("Data/database.duckdb")
+}
+con <- dbConnect(duckdb(), dbdir="Data/database.duckdb")
+indicators <- read_excel("Data/AgDev_Indicator_Estimates.xlsx", 
+                                          sheet = "Sheet1")
+indicators <- indicators |> mutate(across(mean:max, as.numeric))
+indicators <- indicators |> mutate(across(mean:max, ~ signif(.x, 4)))
 dbWriteTable(con, "indicators", indicators)
 
-dbDisconnect(con)
+dbDisconnect(con, shutdown=TRUE)
