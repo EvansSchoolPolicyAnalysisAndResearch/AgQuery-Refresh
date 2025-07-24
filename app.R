@@ -203,10 +203,12 @@ accordion_panel(HTML("Show/Hide Filters<br><p style='font-size: 12px'><i>Note: L
   tags$div(
            DTOutput("dataTab"), style="font-size:80%", margin='0 0 0 -20px'),
   tags$footer(
-    tags$div(id='citediv',
-      tags$p(class='citation', 'University of Washington, Evans Policy Analysis and Research Group (EPAR) (2025) Living Standards Measurement Study - Integrated Surveys on Agriculture: Processed Datasets for Ethiopia ESS, Malawi IHS/IHPS, Nigeria GHS, Tanzania NPS, and Uganda NPS from 2009-2022.'
-             ),
-      tags$p(class='citation', 'This content was originally published in 2019 and last updated on July 24th, 2025')),
+    tags$div(class='citediv',
+      tags$p('Citation:'),
+      tags$p('University of Washington, Evans Policy Analysis and Research Group (EPAR) (2025) Living Standards Measurement Study - Integrated Surveys on Agriculture: Processed Datasets for Ethiopia ESS, Malawi IHS/IHPS, Nigeria GHS, Tanzania NPS, and Uganda NPS from 2009-2022.'),
+      tags$p('This content was originally published in 2019 and last updated on July 24th, 2025'),
+      tags$p(class='citation')
+      ),
     tags$div(id='credits',
              tags$p(id='footimg', 'EPAR @ University of Washington')),
     tags$div(id='about',
