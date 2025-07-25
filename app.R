@@ -115,6 +115,7 @@ filterTable <- function(tab, countries, indics, gender, farmsize, commodity, cur
 ui <- page_fixed(
   includeCSS("www/main.css"),
     tags$head(
+      if(file.exists("www/gtag.html")) includeHTML("www/gtag.html"),
       tags$style("
       @import url('https://fonts.googleapis.com/css?family=Encode+Sans:900|Open+Sans');
                  .btn.btn-default.action-button {--bs-btn-line-height: 0.9; font-size:0.7em;}
