@@ -1,4 +1,7 @@
 # AgQuery-Refresh
+
+A Shiny port of our simple indicator database lookup tool. AgQuery makes searching and filtering EPAR's LSMS-ISA summary statistics easier.
+
 Initial Setup:
 
 1. Running AgQuery requires R and R Studio (see setup instructions [here](https://posit.co/download/rstudio-desktop/))
