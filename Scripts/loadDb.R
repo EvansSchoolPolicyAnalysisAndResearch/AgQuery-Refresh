@@ -13,3 +13,4 @@ indicators <- indicators |> mutate(across(mean:max, ~ signif(.x, 4)))
 dbWriteTable(con, "indicators", indicators)
 
 dbDisconnect(con, shutdown=TRUE)
+
