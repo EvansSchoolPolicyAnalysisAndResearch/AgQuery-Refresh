@@ -11,66 +11,6 @@ library(duckdb)
 library(dbplyr)
 library(duckplyr)
 
-#Run loadDb.R in scripts whenever the excel sheet is updated.
-#indicators <- read_excel("Data/AgDev_Indicator_Estimates.xlsx")
-indicators <- data.frame()
-con <- dbConnect(duckdb(), dbdir="Data/database.duckdb", read_only=T)
-indicators <- tbl(con, "indicators")
-duckdb_register(con, "indicators", indicators, overwrite=T)
-#indicators <- read.csv("Data/AgDev_Indicator_Estimates.csv")
-#row.names(indicators) <- NULL
-
-countree <- indicators |> select(Geography, Year) |> distinct() |> as.data.frame()
-indiclist <- indicators |> select(indicatorcategory, indicatorname) |> distinct() |> as.data.frame()
-genders <- indicators |> 
-  select(genderdisaggregation) |> 
-  distinct() |> 
-  as.data.frame() |>
-  mutate(level=str_to_title(str_extract(genderdisaggregation, "(households)|(livestock managers)|(plot managers)|(laborers)"))) |>
-  arrange(level)
-
-commodities <- indicators |> 
-  select(commoditydisaggregation) |> 
-  distinct() |> 
-  as.data.frame() |>
-  filter(commoditydisaggregation!="N/A", !is.na(commoditydisaggregation)) |> 
-  mutate(category=ifelse(str_detect(commoditydisaggregation, regex("[rR]uminants|[pP]oultry|[lL]ivestock")), "Livestock", "Crops")) |>
-  arrange(commoditydisaggregation)
-
-
-currencies <- indicators |> select(currencyconversion) |> distinct() |> filter(!is.na(currencyconversion), currencyconversion!="N/A") |> as.data.frame()
-#Kludgy solution
-farm_sizes <- data.frame(farm_size_html = factor(seq(1:9),
-                                                 labels=c("0 ha", "0&lt;ha&lt;=1", "0&lt;ha&lt;=2", "0&lt;ha&lt;=4", "1&lt;ha&lt;=2", "2&lt;ha&lt;=4", "&gt;4 ha", "All", "N/A"), ordered=T),
-                         farm_size_raw = c("0 ha", "0<ha<=1", "0<ha<=2", "0<ha<=4", "1<ha<=2", "2<ha<=4", ">4 ha", "All", "N/A"))
-#farm_sizes <- indicators |> select(hhfarmsizedisaggregation) |> distinct() |> unlist(use.names=F)
-#farm_sizes <- farm_sizes[order(farm_sizes)]
-table_nicenames <- c("Geography", 
-                     "Survey", 
-                     "Instrument",
-                     "Year",
-                     "Indicator Category", 
-                     "Indicator Name", 
-                     "Units", 
-                     "Commodity", 
-                     "Gender", 
-                     "Farm Size", 
-                     "Total Population",
-                     "Sample Population",
-                     "Currency Conversion",
-                     "Level of Observation",
-                     "Weight",
-                     "Short Name",
-                     "Mean",
-                     "SE",
-                     "SD", 
-                     "p25",
-                     "p50",
-                     "p75",
-                     "min",
-                     "max",
-                     "N",
-                     "N > 30")
 
 filterTable <- function(tab, countries, indics, gender, farmsize, commodity, currency){
   
@@ -220,9 +160,62 @@ accordion_panel(HTML("Show/Hide Filters<br><p style='font-size: 12px'><i>Note: L
     )
 )
 
-# Define server logic required to draw a histogram
 server <- function(input, output, session) {
-
+    con <- dbConnect(duckdb(), dbdir="Data/database.duckdb", read_only=T)
+    indicators <- tbl(con, "indicators") |> data.frame()
+  
+    countree <- indicators |> select(Geography, Year) |> distinct() |> as.data.frame()
+    indiclist <- indicators |> select(indicatorcategory, indicatorname) |> distinct() |> as.data.frame()
+    genders <- indicators |> 
+      select(genderdisaggregation) |> 
+      distinct() |> 
+      as.data.frame() |>
+      mutate(level=str_to_title(str_extract(genderdisaggregation, "(households)|(livestock managers)|(plot managers)|(laborers)"))) |>
+      arrange(level)
+    
+    commodities <- indicators |> 
+      select(commoditydisaggregation) |> 
+      distinct() |> 
+      as.data.frame() |>
+      filter(commoditydisaggregation!="N/A", !is.na(commoditydisaggregation)) |> 
+      mutate(category=ifelse(str_detect(commoditydisaggregation, regex("[rR]uminants|[pP]oultry|[lL]ivestock")), "Livestock", "Crops")) |>
+      arrange(commoditydisaggregation)
+    
+    
+    currencies <- indicators |> select(currencyconversion) |> distinct() |> filter(!is.na(currencyconversion), currencyconversion!="N/A") |> as.data.frame()
+    #Kludgy solution
+    farm_sizes <- data.frame(farm_size_html = factor(seq(1:9),
+                                                     labels=c("0 ha", "0&lt;ha&lt;=1", "0&lt;ha&lt;=2", "0&lt;ha&lt;=4", "1&lt;ha&lt;=2", "2&lt;ha&lt;=4", "&gt;4 ha", "All", "N/A"), ordered=T),
+                             farm_size_raw = c("0 ha", "0<ha<=1", "0<ha<=2", "0<ha<=4", "1<ha<=2", "2<ha<=4", ">4 ha", "All", "N/A"))
+    #farm_sizes <- indicators |> select(hhfarmsizedisaggregation) |> distinct() |> unlist(use.names=F)
+    #farm_sizes <- farm_sizes[order(farm_sizes)]
+    table_nicenames <- c("Geography", 
+                         "Survey", 
+                         "Instrument",
+                         "Year",
+                         "Indicator Category", 
+                         "Indicator Name", 
+                         "Units", 
+                         "Commodity", 
+                         "Gender", 
+                         "Farm Size", 
+                         "Total Population",
+                         "Sample Population",
+                         "Currency Conversion",
+                         "Level of Observation",
+                         "Weight",
+                         "Short Name",
+                         "Mean",
+                         "SE",
+                         "SD", 
+                         "p25",
+                         "p50",
+                         "p75",
+                         "min",
+                         "max",
+                         "N",
+                         "N > 30")
+  
     output$countree <- renderTree(dfToTree(countree, c("Geography","Year")))
     output$indics <- renderTree(dfToTree(indiclist, c("indicatorcategory", "indicatorname")))
     output$genders <- renderTree(dfToTree(genders, c("level", "genderdisaggregation")))
