@@ -13,6 +13,32 @@ library(duckplyr)
 
 
 filterTable <- function(tab, countries, indics, gender, farmsize, commodity, currency){
+      table_nicenames <- c("Geography", 
+                         "Survey", 
+                         "Instrument",
+                         "Year",
+                         "Indicator Category", 
+                         "Indicator Name", 
+                         "Units", 
+                         "Commodity", 
+                         "Gender", 
+                         "Farm Size", 
+                         "Total Population",
+                         "Sample Population",
+                         "Currency Conversion",
+                         "Level of Observation",
+                         "Weight",
+                         "Short Name",
+                         "Mean",
+                         "SE",
+                         "SD", 
+                         "p25",
+                         "p50",
+                         "p75",
+                         "min",
+                         "max",
+                         "N",
+                         "N > 30")
   
   if(length(countries) > 0) {
     counsout <- treeToDf(countries)[,1:2]
@@ -189,32 +215,7 @@ server <- function(input, output, session) {
                              farm_size_raw = c("0 ha", "0<ha<=1", "0<ha<=2", "0<ha<=4", "1<ha<=2", "2<ha<=4", ">4 ha", "All", "N/A"))
     #farm_sizes <- indicators |> select(hhfarmsizedisaggregation) |> distinct() |> unlist(use.names=F)
     #farm_sizes <- farm_sizes[order(farm_sizes)]
-    table_nicenames <- c("Geography", 
-                         "Survey", 
-                         "Instrument",
-                         "Year",
-                         "Indicator Category", 
-                         "Indicator Name", 
-                         "Units", 
-                         "Commodity", 
-                         "Gender", 
-                         "Farm Size", 
-                         "Total Population",
-                         "Sample Population",
-                         "Currency Conversion",
-                         "Level of Observation",
-                         "Weight",
-                         "Short Name",
-                         "Mean",
-                         "SE",
-                         "SD", 
-                         "p25",
-                         "p50",
-                         "p75",
-                         "min",
-                         "max",
-                         "N",
-                         "N > 30")
+
   
     output$countree <- renderTree(dfToTree(countree, c("Geography","Year")))
     output$indics <- renderTree(dfToTree(indiclist, c("indicatorcategory", "indicatorname")))
