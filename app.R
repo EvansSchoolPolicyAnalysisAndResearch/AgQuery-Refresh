@@ -12,34 +12,8 @@ library(dbplyr)
 library(duckplyr)
 
 
-filterTable <- function(tab, countries, indics, gender, farmsize, commodity, currency){
-      table_nicenames <- c("Geography", 
-                         "Survey", 
-                         "Instrument",
-                         "Year",
-                         "Indicator Category", 
-                         "Indicator Name", 
-                         "Units", 
-                         "Commodity", 
-                         "Gender", 
-                         "Farm Size", 
-                         "Total Population",
-                         "Sample Population",
-                         "Currency Conversion",
-                         "Level of Observation",
-                         "Weight",
-                         "Short Name",
-                         "Mean",
-                         "SE",
-                         "SD", 
-                         "p25",
-                         "p50",
-                         "p75",
-                         "min",
-                         "max",
-                         "N",
-                         "N > 30")
-  
+filterTable <- function(tab, countries, indics, gender, farmsize, commodity, currency, global_params){
+  list2env(global_params, envir=environment())
   if(length(countries) > 0) {
     counsout <- treeToDf(countries)[,1:2]
     names(counsout) <- c("Geography","Year")
@@ -189,6 +163,32 @@ accordion_panel(HTML("Show/Hide Filters<br><p style='font-size: 12px'><i>Note: L
 server <- function(input, output, session) {
     con <- dbConnect(duckdb(), dbdir="Data/database.duckdb", read_only=T)
     indicators <- tbl(con, "indicators") |> data.frame()
+    table_nicenames <- c("Geography", 
+                         "Survey", 
+                         "Instrument",
+                         "Year",
+                         "Indicator Category", 
+                         "Indicator Name", 
+                         "Units", 
+                         "Commodity", 
+                         "Gender", 
+                         "Farm Size", 
+                         "Total Population",
+                         "Sample Population",
+                         "Currency Conversion",
+                         "Level of Observation",
+                         "Weight",
+                         "Short Name",
+                         "Mean",
+                         "SE",
+                         "SD", 
+                         "p25",
+                         "p50",
+                         "p75",
+                         "min",
+                         "max",
+                         "N",
+                         "N > 30")
   
     countree <- indicators |> select(Geography, Year) |> distinct() |> as.data.frame()
     indiclist <- indicators |> select(indicatorcategory, indicatorname) |> distinct() |> as.data.frame()
@@ -216,7 +216,14 @@ server <- function(input, output, session) {
     #farm_sizes <- indicators |> select(hhfarmsizedisaggregation) |> distinct() |> unlist(use.names=F)
     #farm_sizes <- farm_sizes[order(farm_sizes)]
 
-  
+    global_params <- list(table_nicenames=table_nicenames, 
+                          countree=countree, 
+                          indiclist=indiclist, 
+                          genders=genders, 
+                          commodities=commodities, 
+                          currencies=currencies, 
+                          farm_sizes=farm_sizes)
+    
     output$countree <- renderTree(dfToTree(countree, c("Geography","Year")))
     output$indics <- renderTree(dfToTree(indiclist, c("indicatorcategory", "indicatorname")))
     output$genders <- renderTree(dfToTree(genders, c("level", "genderdisaggregation")))
@@ -243,7 +250,8 @@ server <- function(input, output, session) {
                                       get_selected(input$genders, format="slices"), 
                                       get_selected(input$farmsizes, format="slices"),
                                       get_selected(input$commodities, format="slices"),
-                                      get_selected(input$currencies, format="slices")
+                                      get_selected(input$currencies, format="slices"),
+                                      global_params
                                       )})
     
     output$dataTab <- renderDT({datatable(req(outtable()), extensions='Buttons', 
