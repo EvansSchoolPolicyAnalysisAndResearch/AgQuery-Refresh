@@ -81,9 +81,10 @@ ui <- page_fixed(
           tags$li(
             a(class='about', href='https://evans.uw.edu/policy-impact/epar/agricultural-development-data-curation', 'About the Data')
           ),
-    tags$li(style="font-size: 14px",
-      a(class='home', href="https://agquery.org/agqueryplus", 'Try AgQuery+ for more options on slicing the data, dynamic filtering, and visualizations')
-    )
+    #Retiring AgQuery+ (for now)
+          #tags$li(style="font-size: 14px",
+      #a(class='home', href="https://agquery.org/agqueryplus", 'Try AgQuery+ for more options on slicing the data, dynamic filtering, and visualizations')
+    #)
       )),
     ),
   useShinyjs(),
